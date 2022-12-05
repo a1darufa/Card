@@ -14,9 +14,11 @@ class BoardGameController: UIViewController {
     
     lazy var game: Game = getNewGame()
     lazy var startButtonView = getStartButtonView()
+    lazy var flipAllCardsButtonView = getFlipAllCardsButton()
     lazy var boardGameView = getBoardGameView()
     
     private var flippedCards: [UIView] = []
+    private let margin: CGFloat = 10
     
     private var cardSize: CGSize {
         CGSize(width: 80, height: 120)
@@ -33,6 +35,7 @@ class BoardGameController: UIViewController {
         
         view.addSubview(startButtonView)
         view.addSubview(boardGameView)
+        view.addSubview(flipAllCardsButtonView)
     }
     
     override func viewDidLoad() {
@@ -45,6 +48,26 @@ class BoardGameController: UIViewController {
         game.cardsCount = self.cardsPairsCount
         game.generateCards()
         return game
+    }
+    
+    private func getFlipAllCardsButton() -> UIButton {
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+        
+        if let firstScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            let window = UIWindow(windowScene: firstScene)
+            let topPadding = window.safeAreaInsets.top
+            button.frame.origin.y = topPadding
+            button.frame.origin.x = margin
+            button.frame.size.width = UIScreen.main.bounds.width / 2 - margin * 2 - startButtonView.frame.size.width / 2
+        }
+        
+        button.setTitle("Flip", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.gray, for: .highlighted)
+        button.backgroundColor = .systemGray4
+        button.layer.cornerRadius = 10
+        
+        return button
     }
 
     private func getStartButtonView() -> UIButton {
@@ -68,7 +91,6 @@ class BoardGameController: UIViewController {
     }
     
     private func getBoardGameView() -> UIView {
-        let margin: CGFloat = 10
         let boardView = UIView()
         
         boardView.frame.origin.x = margin
