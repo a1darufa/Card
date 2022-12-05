@@ -28,7 +28,6 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
     
     //MARK: CardView private properties
     private let margin: Int = 10
-    private var anchorPointPrivate: CGPoint = CGPoint(x: 0, y: 0)
     private var startTouchPoint: CGPoint!
     
     lazy var frontSideView: UIView = self.getFrontSideView()
@@ -57,15 +56,25 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        anchorPointPrivate.x = touches.first!.location(in: window).x - frame.minX
-        anchorPointPrivate.y = touches.first!.location(in: window).y - frame.minY
-
         startTouchPoint = frame.origin
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.frame.origin.x = touches.first!.location(in: window).x - anchorPointPrivate.x
-        self.frame.origin.y = touches.first!.location(in: window).y - anchorPointPrivate.y
+        guard let sv = superview, let touch = touches.first else { return }
+        
+        let gameBoardFrame = sv.bounds
+        let newLocation = touch.location(in: self)
+        let previousLocation = touch.previousLocation(in: self)
+        
+        var newFrame = self.frame.offsetBy(dx: newLocation.x - previousLocation.x, dy: newLocation.y - previousLocation.y)
+        
+        newFrame.origin.x = max(newFrame.origin.x, 0)
+        newFrame.origin.x = min(newFrame.origin.x, gameBoardFrame.size.width - newFrame.size.width)
+        
+        newFrame.origin.y = max(newFrame.origin.y, 0)
+        newFrame.origin.y = min(newFrame.origin.y, gameBoardFrame.size.height - newFrame.size.height)
+
+        self.frame = newFrame
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
